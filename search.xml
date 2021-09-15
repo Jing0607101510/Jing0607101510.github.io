@@ -71,7 +71,8 @@
   <entry>
     <title>test4</title>
     <url>/2021/09/15/test4/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<p>C++很强。</p>
+]]></content>
       <categories>
         <category>编程语言</category>
       </categories>
