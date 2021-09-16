@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>我的第一篇博客</title>
-    <url>/2021/09/16/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</url>
+    <title>我的第二篇</title>
+    <url>/2021/09/16/%E6%88%91%E7%9A%84%E7%AC%AC%E4%BA%8C%E7%AF%87/</url>
     <content><![CDATA[<p>摘要</p>
-<p>测试展开是否有用</p>
 <span id="more"></span>
 <p>正文</p>
-<p><img src="/.io//image-20210916001824950.png" alt="image-20210916001824950"></p>
+<p><img src="figure/image-20210916101336126.png" alt="image-20210916101336126"></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>第3篇</title>
+    <url>/2021/09/16/%E7%AC%AC3%E7%AF%87/</url>
+    <content><![CDATA[<p>摘要</p>
+<span id="more"></span>
+<p>正文</p>
+<p><img src="/2021/09/16/%E7%AC%AC3%E7%AF%87/image-20210916102224447.png" alt="image-20210916102224447"></p>
 ]]></content>
   </entry>
 </search>
