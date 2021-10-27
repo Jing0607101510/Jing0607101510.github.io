@@ -22,15 +22,20 @@
     var CONFIG = {"hostname":"jing0607101510.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Will&#39;s Blog">
-<meta property="og:url" content="https://jing0607101510.github.io/archives/index.html">
+  <meta name="description" content="各种不同的数据模型的比较。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据模型与查询语句">
+<meta property="og:url" content="https://jing0607101510.github.io/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/index.html">
 <meta property="og:site_name" content="Will&#39;s Blog">
+<meta property="og:description" content="各种不同的数据模型的比较。">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-27T03:42:00.000Z">
+<meta property="article:modified_time" content="2021-10-27T03:44:28.471Z">
 <meta property="article:author" content="Will">
+<meta property="article:tag" content="数据密集型应用系统设计">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://jing0607101510.github.io/archives/">
+<link rel="canonical" href="https://jing0607101510.github.io/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/">
 
 
 <script id="page-configurations">
@@ -38,12 +43,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>归档 | Will's Blog</title>
+  <title>数据模型与查询语句 | Will's Blog</title>
   
 
 
@@ -180,135 +185,115 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">嗯..! 目前共计 4 篇日志。 继续努力。</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jing0607101510.github.io/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Will">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Will's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据模型与查询语句
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-10-27 11:42:00 / 修改时间：11:44:28" itemprop="dateCreated datePublished" datetime="2021-10-27T11:42:00+08:00">2021-10-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">分布式系统</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>442</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
-    </div>
+        <p>各种不同的数据模型的比较。</p>
+<span id="more"></span>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-10-27T11:42:00+08:00"
-              content="2021-10-27">
-          10-27
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/" itemprop="url">
-            <span itemprop="name">数据模型与查询语句</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-10-25T15:51:06+08:00"
-              content="2021-10-25">
-          10-25
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/" itemprop="url">
-            <span itemprop="name">可靠、可扩展、可维护的系统应用</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-09-23T13:47:19+08:00"
-              content="2021-09-23">
-          09-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/" itemprop="url">
-            <span itemprop="name">阿里云学生服务器购买与配置</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-09-16T10:41:51+08:00"
-              content="2021-09-16">
-          09-16
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/09/16/hexo%E5%9B%BE%E7%89%87%E4%BF%9D%E5%AD%98%E9%97%AE%E9%A2%98/" itemprop="url">
-            <span itemprop="name">hexo图片保存问题</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/" itemprop="url">
-              
-                <span itemprop="name">未命名</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2021-10-27T11:46:02+08:00"
-              content="2021-10-27" >
-          10-27
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+<h1 id="关系模型和文档模型"><a href="#关系模型和文档模型" class="headerlink" title="关系模型和文档模型"></a>关系模型和文档模型</h1><p>​    关系模型对应的是多对一，多对多的关系（简单的多对多关系），通常需要连结。关系模型的数据结构更加的稳定。模式是显式的。</p>
+<p>​    关系模型的数据格式是表。所需要的数据可能会被划分到多个表中。通常关系模型是规范化的（没有数据冗余？）。</p>
+<p>​    文档模型对应的是一对多的关系，通常不需要连结，也就记录之间没什么关系，如果要连结的话就可能需要在应用层进行连结。文档模型更加灵活，数据的结构可以灵活变化，模式是隐式的，在读取的时候进行解析。</p>
+<p>​    文档模型的编码通常为json、xml或者其二进制的变体的连续字符串。通常文档模型是反规范的（复制数据），需要额外的操作来保证数据的一致性。</p>
+<h1 id="数据查询语句"><a href="#数据查询语句" class="headerlink" title="数据查询语句"></a>数据查询语句</h1><ul>
+<li><strong>声明式查询语句</strong> 例如SQL语句，CSS选择器，XPath选择器。</li>
+<li><strong>命令式查询语句</strong> 类似于通过函数里的语句进行查找？</li>
+</ul>
+<h1 id="图状数据模型"><a href="#图状数据模型" class="headerlink" title="图状数据模型"></a>图状数据模型</h1><p>​    图状数据模型用来处理多对多的关系。通常图数据也可以使用关系模型来处理。图数据库通常不会对数据强加一个模式，这就使得应用程序更加容易适应不断变化的需求。</p>
+<p>​    </p>
 
     </div>
-  </div>
-  
-  
-  
 
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" rel="tag"> <i class="fa fa-tag"></i> 数据密集型应用系统设计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/" rel="prev" title="可靠、可扩展、可维护的系统应用">
+      <i class="fa fa-chevron-left"></i> 可靠、可扩展、可维护的系统应用
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
   
 
 
@@ -361,6 +346,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%96%87%E6%A1%A3%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">关系模型和文档模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5"><span class="nav-number">2.</span> <span class="nav-text">数据查询语句</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E7%8A%B6%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">图状数据模型</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

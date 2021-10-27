@@ -1,227 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title>hexo图片保存问题</title>
-    <url>/2021/09/16/hexo%E5%9B%BE%E7%89%87%E4%BF%9D%E5%AD%98%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>hexo图片加载不出来。根本原因是图片的路径有问题。需要安装插件，修改插件的js脚本，并配置typora的图片保存位置。</p>
-<span id="more"></span>
-
-<h1 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h1><p>在cmd或者右键-&gt; git bash打开命令行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm install hexo-asset-image --save</span><br></pre></td></tr></table></figure>
-
-<p>如果npm安装有问题，可以先安装cnpm，然后通过cnpm安装插件</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="修改插件的js脚本"><a href="#修改插件的js脚本" class="headerlink" title="修改插件的js脚本"></a>修改插件的js脚本</h1><p>打开/node_modules/hexo-asset-image/index.js，将脚本内容替换成以下代码</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="meta">&#x27;use strict&#x27;</span>;</span><br><span class="line"><span class="keyword">var</span> cheerio = <span class="built_in">require</span>(<span class="string">&#x27;cheerio&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// http://stackoverflow.com/questions/14480345/how-to-get-the-nth-occurrence-in-a-string</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getPosition</span>(<span class="params">str, m, i</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> str.split(m, i).join(m).length;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> version = <span class="built_in">String</span>(hexo.version).split(<span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">hexo.extend.filter.register(<span class="string">&#x27;after_post_render&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> config = hexo.config;</span><br><span class="line">  <span class="keyword">if</span>(config.post_asset_folder)&#123;</span><br><span class="line">    	<span class="keyword">var</span> link = data.permalink;</span><br><span class="line">	<span class="keyword">if</span>(version.length &gt; <span class="number">0</span> &amp;&amp; <span class="built_in">Number</span>(version[<span class="number">0</span>]) == <span class="number">3</span>)</span><br><span class="line">	   <span class="keyword">var</span> beginPos = getPosition(link, <span class="string">&#x27;/&#x27;</span>, <span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	   <span class="keyword">var</span> beginPos = getPosition(link, <span class="string">&#x27;/&#x27;</span>, <span class="number">3</span>) + <span class="number">1</span>;</span><br><span class="line">	<span class="comment">// In hexo 3.1.1, the permalink of &quot;about&quot; page is like &quot;.../about/index.html&quot;.</span></span><br><span class="line">	<span class="keyword">var</span> endPos = link.lastIndexOf(<span class="string">&#x27;/&#x27;</span>) + <span class="number">1</span>;</span><br><span class="line">    link = link.substring(beginPos, endPos);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> toprocess = [<span class="string">&#x27;excerpt&#x27;</span>, <span class="string">&#x27;more&#x27;</span>, <span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; toprocess.length; i++)&#123;</span><br><span class="line">      <span class="keyword">var</span> key = toprocess[i];</span><br><span class="line"> </span><br><span class="line">      <span class="keyword">var</span> $ = cheerio.load(data[key], &#123;</span><br><span class="line">        <span class="attr">ignoreWhitespace</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">xmlMode</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">lowerCaseTags</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">decodeEntities</span>: <span class="literal">false</span></span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      $(<span class="string">&#x27;img&#x27;</span>).each(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> ($(<span class="built_in">this</span>).attr(<span class="string">&#x27;src&#x27;</span>))&#123;</span><br><span class="line">			<span class="comment">// For windows style path, we replace &#x27;\&#x27; to &#x27;/&#x27;.</span></span><br><span class="line">			<span class="keyword">var</span> src = $(<span class="built_in">this</span>).attr(<span class="string">&#x27;src&#x27;</span>).replace(<span class="string">&#x27;\\&#x27;</span>, <span class="string">&#x27;/&#x27;</span>);</span><br><span class="line">			<span class="keyword">if</span>(!<span class="regexp">/http[s]*.*|\/\/.*/</span>.test(src) &amp;&amp;</span><br><span class="line">			   !<span class="regexp">/^\s*\//</span>.test(src)) &#123;</span><br><span class="line">			  <span class="comment">// For &quot;about&quot; page, the first part of &quot;src&quot; can&#x27;t be removed.</span></span><br><span class="line">			  <span class="comment">// In addition, to support multi-level local directory.</span></span><br><span class="line">			  <span class="keyword">var</span> linkArray = link.split(<span class="string">&#x27;/&#x27;</span>).filter(<span class="function"><span class="keyword">function</span>(<span class="params">elem</span>)</span>&#123;</span><br><span class="line">				<span class="keyword">return</span> elem != <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">			  &#125;);</span><br><span class="line">			  <span class="keyword">var</span> srcArray = src.split(<span class="string">&#x27;/&#x27;</span>).filter(<span class="function"><span class="keyword">function</span>(<span class="params">elem</span>)</span>&#123;</span><br><span class="line">				<span class="keyword">return</span> elem != <span class="string">&#x27;&#x27;</span> &amp;&amp; elem != <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">			  &#125;);</span><br><span class="line">			  <span class="keyword">if</span>(srcArray.length &gt; <span class="number">1</span>)</span><br><span class="line">				srcArray.shift();</span><br><span class="line">			  src = srcArray.join(<span class="string">&#x27;/&#x27;</span>);</span><br><span class="line">			  $(<span class="built_in">this</span>).attr(<span class="string">&#x27;src&#x27;</span>, config.root + link + src);</span><br><span class="line">			  <span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info(<span class="string">&quot;update link as:--&gt;&quot;</span>+config.root + link + src);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info(<span class="string">&quot;no src attr, skipped...&quot;</span>);</span><br><span class="line">			<span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info($(<span class="built_in">this</span>));</span><br><span class="line">		&#125;</span><br><span class="line">      &#125;);</span><br><span class="line">      data[key] = $.html();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="修改站点配置文件"><a href="#修改站点配置文件" class="headerlink" title="修改站点配置文件"></a>修改站点配置文件</h1><p>找到根目录下的站点配置文件_config.yml文件，搜索<code>post_asset_folder</code>。修改为</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">post_asset_folder: true</span><br></pre></td></tr></table></figure>
-
-<p>这个配置的作用为，当通过<code>hexo new post &quot;xxx&quot;</code>创建md文件的时候，会附带创建一个同名的目录。我们需要将md文档中用到的图片存放在这个同名目录中。</p>
-<h1 id="修改Typora关于图片存储路径的配置"><a href="#修改Typora关于图片存储路径的配置" class="headerlink" title="修改Typora关于图片存储路径的配置"></a>修改Typora关于图片存储路径的配置</h1><p>打开typora，选择 文件 -&gt; 偏好设置 -&gt; 图像</p>
-<p><img src="/2021/09/16/hexo%E5%9B%BE%E7%89%87%E4%BF%9D%E5%AD%98%E9%97%AE%E9%A2%98/image-20210916105327110.png" alt="image-20210916105327110"></p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
-<li><a href="https://blog.csdn.net/weixin_44999716/article/details/112401495">(70条消息) hexo博客中插入的图片不显示_煜成’Studio的博客-CSDN博客_hexo 图片不显示</a></li>
-</ol>
-]]></content>
+<search> 
+  
+  
+    
+    <entry>
+      <title>数据模型与查询语句</title>
+      <link href="/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/"/>
+      <url>/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/</url>
+      
+        <content type="html"><![CDATA[<p>各种不同的数据模型的比较。</p><span id="more"></span><h1 id="关系模型和文档模型"><a href="#关系模型和文档模型" class="headerlink" title="关系模型和文档模型"></a>关系模型和文档模型</h1><p>​    关系模型对应的是多对一，多对多的关系（简单的多对多关系），通常需要连结。关系模型的数据结构更加的稳定。模式是显式的。</p><p>​    关系模型的数据格式是表。所需要的数据可能会被划分到多个表中。通常关系模型是规范化的（没有数据冗余？）。</p><p>​    文档模型对应的是一对多的关系，通常不需要连结，也就记录之间没什么关系，如果要连结的话就可能需要在应用层进行连结。文档模型更加灵活，数据的结构可以灵活变化，模式是隐式的，在读取的时候进行解析。</p><p>​    文档模型的编码通常为json、xml或者其二进制的变体的连续字符串。通常文档模型是反规范的（复制数据），需要额外的操作来保证数据的一致性。</p><h1 id="数据查询语句"><a href="#数据查询语句" class="headerlink" title="数据查询语句"></a>数据查询语句</h1><ul><li><strong>声明式查询语句</strong> 例如SQL语句，CSS选择器，XPath选择器。</li><li><strong>命令式查询语句</strong> 类似于通过函数里的语句进行查找？</li></ul><h1 id="图状数据模型"><a href="#图状数据模型" class="headerlink" title="图状数据模型"></a>图状数据模型</h1><p>​    图状数据模型用来处理多对多的关系。通常图数据也可以使用关系模型来处理。图数据库通常不会对数据强加一个模式，这就使得应用程序更加容易适应不断变化的需求。</p><p>​    </p>]]></content>
+      
+      
       <categories>
-        <category>环境配置</category>
+          
+          <category> 分布式系统 </category>
+          
       </categories>
-      <tags>
-        <tag>环境配置</tag>
-        <tag>hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>阿里云学生服务器购买与配置</title>
-    <url>/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<p>阿里云学生服务器的购买与配置</p>
-<span id="more"></span>
-
-<h1 id="购买阿里云学生服务器"><a href="#购买阿里云学生服务器" class="headerlink" title="购买阿里云学生服务器"></a>购买阿里云学生服务器</h1><p>点击<a href="https://dashi.aliyun.com/site/arison/student">阿里云学生机活动地址 (aliyun.com)</a> ，选择”轻量应用服务器“。</p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923135150578.png" alt="image-20210923135150578"></p>
-<p>选择合适的配置</p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923135236779.png" alt="image-20210923135236779"></p>
-<p>然后通过认证，支付即可。</p>
-<h1 id="学生服务器的作用"><a href="#学生服务器的作用" class="headerlink" title="学生服务器的作用"></a>学生服务器的作用</h1><ul>
-<li><strong>搭建个人网站</strong>。其中代表是WordPress建站，参考教程<a href="https://link.zhihu.com/?target=https://www.vpssw.com/12.html">宝塔面板搭建WordPress教程</a>。搭建一个WordPress网站（博客，CMS和资讯各种风格）。WordPress是开源免费的建站程序。WordPress让普通人也能轻松拥有一个属于自己的网站。当然还有很多免费的开源建站程序，比如ZBlog,Typecho,Emlog,帝国CMS,Hexo,Hugo等很多种。大家可以关注导航网站(nav.vpssw.com)获得更多的建站程序。</li>
-<li><strong>搭建企业Web业务系统</strong>。还有搭建各种企业业务系统需要用到的软件环境。比如Java Web环境，PHP运行环境，Python Web环境，Go语言Web环境等待。还有包括企业各种业务系统的搭建和部署。OA办公系统，ERP系统，财务报表系统，网站建站系统，即时通讯系统等多种业务场景。</li>
-<li><strong>学习Linux运维技能</strong>。现在Linux运维技能在这个信息化时代很吃香，社会上有很多Linux运维高新岗位。所以早点接触和学习Linux运维知识，多一门就业技能。</li>
-<li><strong>搭建个人免费图床</strong>。参考教程：<a href="https://link.zhihu.com/?target=http://tencent.yundashi168.com/853.html">宝塔面板搭建免费图床Chevereto教程</a></li>
-<li><strong>搭建个人下载站</strong>：<a href="https://link.zhihu.com/?target=http://down.vpssw.com/">个人下载站欣赏</a></li>
-<li><strong>搭建个人私人云盘</strong>。</li>
-<li><strong>搭建个人云知识笔记Leanote</strong>。参考教程：<a href="https://link.zhihu.com/?target=https://www.yundashi168.com/186.html">搭建自己专属的云笔记Leanote(开源)</a></li>
-<li>搭建团队任务协作系统。参考教程：<a href="https://link.zhihu.com/?target=https://www.yundashi168.com/174.html">搭建开源项目kooteam(轻量级团队在线协作)</a></li>
-<li><strong>搭建各种项目文档系统</strong>，例如showdoc文档,Docsify文档等。参考教程：<a href="https://link.zhihu.com/?target=https://www.yundashi168.com/194.html">利用Docsify快速搭建技术文档展示网站</a></li>
-<li><strong>搭建内网穿透服务</strong>。参考教程:<a href="https://link.zhihu.com/?target=http://tencent.yundashi168.com/768.html">花生壳弱爆了~搭建ngrok内网穿透教程</a></li>
-<li><strong>搭建代码仓库管理私服</strong>。搭建git,svn,maven私服。参考教程：<a href="https://link.zhihu.com/?target=http://tencent.yundashi168.com/756.html">Jenkins之Nexus搭建Maven私有仓库</a></li>
-<li><strong>搭建微信小程序，微信公众号，APP，H5前端等应用的后端服务器.</strong></li>
-<li><strong>搭建和部署各种开源项目</strong>。GitHub很多开源项目都支持部署到云服务器。</li>
-</ul>
-<h1 id="服务器的配置"><a href="#服务器的配置" class="headerlink" title="服务器的配置"></a>服务器的配置</h1><ol>
-<li><strong>重置密码。</strong></li>
-</ol>
-<p>在服务器管理控制台的”概览“部分的”服务器信息“栏中，点击“重置密码”重新设置root的密码。</p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923140522038.png" alt="image-20210923140522038"></p>
-<ol start="2">
-<li><strong>安装ssh终端</strong></li>
-</ol>
-<p><a href="https://mobaxterm.mobatek.net/download.html?spm=a2c6h.12873639.0.0.6a287dd7jkDUie">MobaXterm Xserver with SSH, telnet, RDP, VNC and X11 - Download (mobatek.net)</a> 。MobaXterm这个ssh终端分为免费版和收费版。选择免费版。</p>
-<p>这个ssh终端同时支持SSH和sFtp，可视化操作文件，不需要安装ftp工具。支持彩色日志。</p>
-<ol start="3">
-<li><strong>通过MobaXterm连接服务器</strong></li>
-</ol>
-<p>连接服务器有两种方法，一种是以账号密码的方式连接，另一种是通过</p>
-<p><strong>(1) 下面是通过账号和密码来连接服务器。</strong></p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923144057249.png" alt="image-20210923144057249"></p>
-<p><strong>(2) 通过密钥连接</strong></p>
-<p>windows下先检查<code>C:/Users/username/.ssh</code>目录下是否有<code>id_rsa.pub</code>和<code>id_rsa</code>两个文件。如果没有，使用以下命令生成，一直回车即可</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa -b 4096</span><br></pre></td></tr></table></figure>
-
-<p>将公钥<code>id_rsa.pub</code>的内容添加到服务器主机用户目录下的.ssh目录下名为<code>authorized_keys</code>的文件中。使用<code>ssh-copy-id</code>命令来完成添加内容的操作。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">~$</span><span class="bash"> ssh-copy-id remote_user@remote_id</span></span><br><span class="line">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span><br><span class="line">remote_user@remote_id&#x27;s password: </span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   &quot;ssh &#x27;remote_user@remote_id&#x27;&quot;</span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br></pre></td></tr></table></figure>
-
-<p>另一种添加公钥到服务器的<code>authorized_keys</code>的方法。登录阿里云 -&gt; 打开阿里云轻量应用服务器管理控制台 -&gt; 选择需要配置的安全组实例 -&gt; 左侧导航栏选择 服务器运维&gt;远程连接 -&gt; 选择密钥管理 -&gt; 上传公钥。（需要重启服务器）</p>
-<p>配置mobaXterm，使得通过密钥连接服务器。</p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173211225.png" alt="image-20210923173211225"></p>
-<ol start="4">
-<li><strong>[可选]创建一个新的用户</strong></li>
-</ol>
-<p>创建一个新用户，可以使用这个新用户的身份来登录服务器。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">useradd username	# 创建新用户</span><br><span class="line">passwd username # 为新用户设置密码</span><br></pre></td></tr></table></figure>
-
-<p><strong>(1) 以这个身份连接服务器时，报错：</strong></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">/usr/bin/xauth:  file /home/username/.Xauthority does not exist</span><br></pre></td></tr></table></figure>
-
-<p>报错原因是useradd添加用户的时候没有授权对应的家目录。</p>
-<p>解决办法：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chown username:username -R /home/user_dir</span><br></pre></td></tr></table></figure>
-
-<p>或者在一开始创建用户的时候使用以下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">useradd username -m # -m指定创建对应的home目录</span><br><span class="line">usermod -s /bin/bash username  # 指定shell，否则不便于终端操作</span><br></pre></td></tr></table></figure>
-
-<p><strong>(2) Linux下新建用户之后不显示用户名和路径问题解决</strong></p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923151038385.png" alt="image-20210923151038385"></p>
-<p>原因：新创建的用户没有指定shell。</p>
-<p>解决办法：为用户指定shell</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 切换到root用户</span></span><br><span class="line">su root</span><br><span class="line"><span class="meta">#</span><span class="bash"> 使用usermod指定shell</span></span><br><span class="line">usermod -s /bin/bash username</span><br></pre></td></tr></table></figure>
-
-
-
-<ol start="5">
-<li><strong>配置开放安全组，开放指定端口</strong></li>
-</ol>
-<p>登录阿里云 -&gt; 打开阿里云轻量应用服务器管理控制台 -&gt; 选择需要配置的安全组实例 -&gt; 左侧导航栏选择 安全 &gt; 防火墙 -&gt; 选择右上角的添加规则。</p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923152321889.png" alt="image-20210923152321889"></p>
-<ul>
-<li><strong>应用类型</strong>包括HTTPS，HTTP，MySQL，SSH，telnet，全部TCP，全部UDP等，也可以自定义。根据自己的选择，如果想使用已有的应用类型，例如HTTPS，那么后面的端口默认就是443，协议就是TCP。</li>
-<li>如果你<strong>应用类型</strong>选择的是自定义，那么<strong>协议</strong>就可以选择TCP和UDP两种，一般网页访问是TCP，打游戏什么的会用到UDP，根据你自己的需求选择。</li>
-<li>同样的，<strong>端口范围</strong>也可以自己定义，端口范围用“/”分隔，数字为1-65535之间，如1/81表示开放端口1到81。</li>
-<li>设置完毕后保存即可。安全组配置自动生效。</li>
-</ul>
-<h1 id="Vscode远程开发配置"><a href="#Vscode远程开发配置" class="headerlink" title="Vscode远程开发配置"></a>Vscode远程开发配置</h1><ol>
-<li>安装插件 <strong>Remote Development</strong>。</li>
-<li>通过ctrl + alt + p 打开命令输入窗口。输入 ”Remote-SSH:Connect to Host..“.</li>
-<li>第一次使用时选择”Add New SSH Host“配置一下。按照格式输入对应的账号@主机ip</li>
-</ol>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173835199.png" alt="image-20210923173835199"></p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923170705440.png" alt="image-20210923170705440"></p>
-<ol start="4">
-<li>选择第一个配置文件</li>
-</ol>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173926287.png" alt="image-20210923173926287"></p>
-<p>选择后，会在对应的目录下产生一个config文件。文件内容如下</p>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923174215215.png" alt="image-20210923174215215"></p>
-<p>其中，Host代表的是服务器的别名。HostName是服务器的ip，User代表以哪个账号身份登录。</p>
-<ol start="5">
-<li>选择Connect，连接服务器。</li>
-</ol>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923174341163.png" alt="image-20210923174341163"></p>
-<ol start="6">
-<li>选择服务器对应的操作系统类型</li>
-</ol>
-<p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173549483.png" alt="image-20210923173549483"></p>
-<ol start="7">
-<li>通过<code>File-&gt;Open-&gt;File/Folder</code>打开文件或者文件夹，然后就可以像编辑本地文件一样编辑远程文件了。</li>
-</ol>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><p><a href="https://zhuanlan.zhihu.com/p/368487727">阿里云学生服务器申请地址详细攻略及用途案例演示(2021) - 知乎 (zhihu.com)</a></p>
-</li>
-<li><p><a href="https://zhuanlan.zhihu.com/p/301653835">推荐7款超级好用的终端工具 —— SSH+FTP - 知乎 (zhihu.com)</a></p>
-</li>
-<li><p><a href="https://www.cnblogs.com/youcong/p/11070351.html">/usr/bin/xauth: file /home/user/.Xauthority does not exist - 挑战者V - 博客园 (cnblogs.com)</a></p>
-</li>
-<li><p><a href="https://blog.csdn.net/qq_32106647/article/details/81561956">(71条消息) Linux下新建用户之后不显示用户名和路径问题解决_五命九九的博客-CSDN博客</a></p>
-</li>
-<li><p><a href="https://www.vpstip.com/simple-application-stop-firewall.html">阿里云轻量应用服务器如何开放安全组，开放指定端口 - 阿里云优惠网 (vpstip.com)</a></p>
-</li>
-<li><p>[VScode 的远程开发，体验后爽翻 - 知乎 (zhihu.com)](<a href="https://zhuanlan.zhihu.com/p/95678121#:~:text=%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AEVS">https://zhuanlan.zhihu.com/p/95678121#:~:text=二、配置VS</a> Code远程开发插件. 在VS code中，使用 ctrl%2Bshift%2Bx 快捷键打开插件搜索窗口，输入插件 Remote Development,Add New SSH Host 配置一下， myserver 是我自己配置的，选择这个就可以直接登录服务器了。. 然后就照着如下格式输入登录服务器的命令：.)</p>
-</li>
-</ul>
-]]></content>
+      
+      
+        <tags>
+            
+            <tag> 数据密集型应用系统设计 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>可靠、可扩展、可维护的系统应用</title>
+      <link href="/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/"/>
+      <url>/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/</url>
+      
+        <content type="html"><![CDATA[<p>介绍了什么是数据系统，同时数据系统普遍需要满足的三个性质。（1）可靠性。（2）可扩展性。（3）可维护性。</p><span id="more"></span><h1 id="数据系统"><a href="#数据系统" class="headerlink" title="数据系统"></a>数据系统</h1><p>​    很多数据处理的新工具，能够针对不同的应用场景进行优化。这些工具，例如redis、kafka等，能够应用于不同的场景，例如数据存储、消息队列等等。系统之间的界限变得模糊。</p><p>​    通常建立一个应用系统，单个组件并不能满足数据存储和处理的需求，而是多个组件组合在一起，每一个组件负责完成某一部分的功能。多个组件通过应用层代码链接起来。</p><p><img src="/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/image-20211025113538099-16351329492811.png" alt="image-20211025113538099"></p><p>​    大多数的软件系统目标都需要关注三个问题：</p><ul><li><strong>可靠性：</strong>在硬件、软件、人为出错的情况下，系统依然能够提供正常的服务。</li><li><strong>可扩展性：</strong>在数据、流量、复杂性增加的时候，系统需要能够方便扩展以适配这种情况。</li><li><strong>可维护性：</strong>当在维护现有功能或者适配新场景的时候，系统都应高效工作。</li></ul><h1 id="可靠性"><a href="#可靠性" class="headerlink" title="可靠性"></a>可靠性</h1><p>​    系统即使发生了某些错误，系统依然能够继续正常工作。这些错误包括了软件、硬件、人为的错误。我们希望系统能够提供：</p><ul><li>能够提供给用户正常的结果。</li><li>系统能够容忍用户出现错误。</li><li>防止未经授权的访问和滥用。</li><li>性能能够应对典型的场景、合理负载压力。</li></ul><p>一些概念：</p><ul><li><strong>错误、故障（faults）：</strong>组件可能出现的错误。</li><li><strong>容错（fault-tolerant）、弹性（resilient）：</strong> 系统可以应对错误。这里所说的应对错误是有程度的，不是说可以容忍所有错误。容忍不同的错误可能带来不同的待见。容错总是需要制定特定类型的固定。</li><li><strong>失效（failure）:</strong> 失效是整个系统停止，不能为用户提供服务。发生故障不一定会使整个系统失效。通过设计容错机制，避免组件的故障导致系统整体失效。</li></ul><h1 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h1><p>​    系统能够应对流量的增加、数据量的增加等。系统有应对负载增加的能力。</p><h2 id="描述负载"><a href="#描述负载" class="headerlink" title="描述负载"></a>描述负载</h2><p>​    负载使用负载参数来描述。有很多的负载参数：服务器每秒请求处理次数、数据库中写入的比例、聊天室的同时活动用户数量、缓存命中率。当关注不同方面时，使用不同的负载参数。</p><h2 id="描述性能"><a href="#描述性能" class="headerlink" title="描述性能"></a>描述性能</h2><p>描述性能也可以有不同的指标：吞吐量、相应时间等。</p><p>延迟描述的是请求的处理时间。响应时间是指用户发起请求到收到该请求的时间间隔，包括了处理时间、网络延迟、排队时间。</p><p>每个相同的请求可能由于不同的实际情况而得到不同的响应时间。所以响应时间不是一个固定的数字，而是度量一种数值分布。如果使用响应时间的平均值，那么就会掩盖一些信息，无法投录多少用户实际经历了多少延迟。最好是使用百分位数。并且使用滑动窗口的方法，来估算相应时间。</p><p>测试性能的时候，还需要考虑排队延迟。当服务器并行处理的请求有限，正在处理的少数请求会阻塞后面的请求。即使后续请求可能很简单，但是它阻塞在等待先前请求的完成。这是队头阻塞。所以测试系统时，客户端不需要总是等待先前的请求完成再发送下一个请求。</p><h2 id="应对负载增加的方法"><a href="#应对负载增加的方法" class="headerlink" title="应对负载增加的方法"></a>应对负载增加的方法</h2><ul><li><strong>水平扩展：</strong>增加更多的机器。</li><li><strong>垂直扩展：</strong>将机器的性能升级。</li></ul><p>系统应该针对特定应用高度定制。背后取舍因素包括数据读取量、写入量、待存储的数据量、数据的复杂程度、响应时间要求、访问模式，或者更多的是上述所有因素的叠加，再加上其他更复杂的问题。</p><p>扩展能力好的架构通常会做出某些假设，并针对假设优化设计，例如哪些操作是更频繁的，哪些操作是少数情况。如果这些假设最终发现是错误的，那么可扩展性的努力就白费了。</p><h1 id="可维护性"><a href="#可维护性" class="headerlink" title="可维护性"></a>可维护性</h1><ul><li><strong>可运维性：</strong>使得运维更加容易</li><li><strong>简单性：</strong>使用抽象，简化复杂性</li><li><strong>可演化性：</strong>易于改变，应对需求的变化。</li></ul>]]></content>
+      
+      
       <categories>
-        <category>环境配置</category>
+          
+          <category> 分布式系统 </category>
+          
       </categories>
-      <tags>
-        <tag>环境配置</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>可靠、可扩展、可维护的系统应用</title>
-    <url>/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/</url>
-    <content><![CDATA[<p>介绍了什么是数据系统，同时数据系统普遍需要满足的三个性质。（1）可靠性。（2）可扩展性。（3）可维护性。</p>
-<span id="more"></span>
-
-<h1 id="数据系统"><a href="#数据系统" class="headerlink" title="数据系统"></a>数据系统</h1><p>​    很多数据处理的新工具，能够针对不同的应用场景进行优化。这些工具，例如redis、kafka等，能够应用于不同的场景，例如数据存储、消息队列等等。系统之间的界限变得模糊。</p>
-<p>​    通常建立一个应用系统，单个组件并不能满足数据存储和处理的需求，而是多个组件组合在一起，每一个组件负责完成某一部分的功能。多个组件通过应用层代码链接起来。</p>
-<p><img src="/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/image-20211025113538099-16351329492811.png" alt="image-20211025113538099"></p>
-<p>​    大多数的软件系统目标都需要关注三个问题：</p>
-<ul>
-<li><strong>可靠性：</strong>在硬件、软件、人为出错的情况下，系统依然能够提供正常的服务。</li>
-<li><strong>可扩展性：</strong>在数据、流量、复杂性增加的时候，系统需要能够方便扩展以适配这种情况。</li>
-<li><strong>可维护性：</strong>当在维护现有功能或者适配新场景的时候，系统都应高效工作。</li>
-</ul>
-<h1 id="可靠性"><a href="#可靠性" class="headerlink" title="可靠性"></a>可靠性</h1><p>​    系统即使发生了某些错误，系统依然能够继续正常工作。这些错误包括了软件、硬件、人为的错误。我们希望系统能够提供：</p>
-<ul>
-<li>能够提供给用户正常的结果。</li>
-<li>系统能够容忍用户出现错误。</li>
-<li>防止未经授权的访问和滥用。</li>
-<li>性能能够应对典型的场景、合理负载压力。</li>
-</ul>
-<p>一些概念：</p>
-<ul>
-<li><strong>错误、故障（faults）：</strong>组件可能出现的错误。</li>
-<li><strong>容错（fault-tolerant）、弹性（resilient）：</strong> 系统可以应对错误。这里所说的应对错误是有程度的，不是说可以容忍所有错误。容忍不同的错误可能带来不同的待见。容错总是需要制定特定类型的固定。</li>
-<li><strong>失效（failure）:</strong> 失效是整个系统停止，不能为用户提供服务。发生故障不一定会使整个系统失效。通过设计容错机制，避免组件的故障导致系统整体失效。</li>
-</ul>
-<h1 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h1><p>​    系统能够应对流量的增加、数据量的增加等。系统有应对负载增加的能力。</p>
-<h2 id="描述负载"><a href="#描述负载" class="headerlink" title="描述负载"></a>描述负载</h2><p>​    负载使用负载参数来描述。有很多的负载参数：服务器每秒请求处理次数、数据库中写入的比例、聊天室的同时活动用户数量、缓存命中率。当关注不同方面时，使用不同的负载参数。</p>
-<h2 id="描述性能"><a href="#描述性能" class="headerlink" title="描述性能"></a>描述性能</h2><p>描述性能也可以有不同的指标：吞吐量、相应时间等。</p>
-<p>延迟描述的是请求的处理时间。响应时间是指用户发起请求到收到该请求的时间间隔，包括了处理时间、网络延迟、排队时间。</p>
-<p>每个相同的请求可能由于不同的实际情况而得到不同的响应时间。所以响应时间不是一个固定的数字，而是度量一种数值分布。如果使用响应时间的平均值，那么就会掩盖一些信息，无法投录多少用户实际经历了多少延迟。最好是使用百分位数。并且使用滑动窗口的方法，来估算相应时间。</p>
-<p>测试性能的时候，还需要考虑排队延迟。当服务器并行处理的请求有限，正在处理的少数请求会阻塞后面的请求。即使后续请求可能很简单，但是它阻塞在等待先前请求的完成。这是队头阻塞。所以测试系统时，客户端不需要总是等待先前的请求完成再发送下一个请求。</p>
-<h2 id="应对负载增加的方法"><a href="#应对负载增加的方法" class="headerlink" title="应对负载增加的方法"></a>应对负载增加的方法</h2><ul>
-<li><strong>水平扩展：</strong>增加更多的机器。</li>
-<li><strong>垂直扩展：</strong>将机器的性能升级。</li>
-</ul>
-<p>系统应该针对特定应用高度定制。背后取舍因素包括数据读取量、写入量、待存储的数据量、数据的复杂程度、响应时间要求、访问模式，或者更多的是上述所有因素的叠加，再加上其他更复杂的问题。</p>
-<p>扩展能力好的架构通常会做出某些假设，并针对假设优化设计，例如哪些操作是更频繁的，哪些操作是少数情况。如果这些假设最终发现是错误的，那么可扩展性的努力就白费了。</p>
-<h1 id="可维护性"><a href="#可维护性" class="headerlink" title="可维护性"></a>可维护性</h1><ul>
-<li><strong>可运维性：</strong>使得运维更加容易</li>
-<li><strong>简单性：</strong>使用抽象，简化复杂性</li>
-<li><strong>可演化性：</strong>易于改变，应对需求的变化。</li>
-</ul>
-]]></content>
+      
+      
+        <tags>
+            
+            <tag> 数据密集型应用系统设计 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>阿里云学生服务器购买与配置</title>
+      <link href="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/"/>
+      <url>/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/</url>
+      
+        <content type="html"><![CDATA[<p>阿里云学生服务器的购买与配置</p><span id="more"></span><h1 id="购买阿里云学生服务器"><a href="#购买阿里云学生服务器" class="headerlink" title="购买阿里云学生服务器"></a>购买阿里云学生服务器</h1><p>点击<a href="https://dashi.aliyun.com/site/arison/student">阿里云学生机活动地址 (aliyun.com)</a> ，选择”轻量应用服务器“。</p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923135150578.png" alt="image-20210923135150578"></p><p>选择合适的配置</p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923135236779.png" alt="image-20210923135236779"></p><p>然后通过认证，支付即可。</p><h1 id="学生服务器的作用"><a href="#学生服务器的作用" class="headerlink" title="学生服务器的作用"></a>学生服务器的作用</h1><ul><li><strong>搭建个人网站</strong>。其中代表是WordPress建站，参考教程<a href="https://link.zhihu.com/?target=https://www.vpssw.com/12.html">宝塔面板搭建WordPress教程</a>。搭建一个WordPress网站（博客，CMS和资讯各种风格）。WordPress是开源免费的建站程序。WordPress让普通人也能轻松拥有一个属于自己的网站。当然还有很多免费的开源建站程序，比如ZBlog,Typecho,Emlog,帝国CMS,Hexo,Hugo等很多种。大家可以关注导航网站(nav.vpssw.com)获得更多的建站程序。</li><li><strong>搭建企业Web业务系统</strong>。还有搭建各种企业业务系统需要用到的软件环境。比如Java Web环境，PHP运行环境，Python Web环境，Go语言Web环境等待。还有包括企业各种业务系统的搭建和部署。OA办公系统，ERP系统，财务报表系统，网站建站系统，即时通讯系统等多种业务场景。</li><li><strong>学习Linux运维技能</strong>。现在Linux运维技能在这个信息化时代很吃香，社会上有很多Linux运维高新岗位。所以早点接触和学习Linux运维知识，多一门就业技能。</li><li><strong>搭建个人免费图床</strong>。参考教程：<a href="https://link.zhihu.com/?target=http://tencent.yundashi168.com/853.html">宝塔面板搭建免费图床Chevereto教程</a></li><li><strong>搭建个人下载站</strong>：<a href="https://link.zhihu.com/?target=http://down.vpssw.com/">个人下载站欣赏</a></li><li><strong>搭建个人私人云盘</strong>。</li><li><strong>搭建个人云知识笔记Leanote</strong>。参考教程：<a href="https://link.zhihu.com/?target=https://www.yundashi168.com/186.html">搭建自己专属的云笔记Leanote(开源)</a></li><li>搭建团队任务协作系统。参考教程：<a href="https://link.zhihu.com/?target=https://www.yundashi168.com/174.html">搭建开源项目kooteam(轻量级团队在线协作)</a></li><li><strong>搭建各种项目文档系统</strong>，例如showdoc文档,Docsify文档等。参考教程：<a href="https://link.zhihu.com/?target=https://www.yundashi168.com/194.html">利用Docsify快速搭建技术文档展示网站</a></li><li><strong>搭建内网穿透服务</strong>。参考教程:<a href="https://link.zhihu.com/?target=http://tencent.yundashi168.com/768.html">花生壳弱爆了~搭建ngrok内网穿透教程</a></li><li><strong>搭建代码仓库管理私服</strong>。搭建git,svn,maven私服。参考教程：<a href="https://link.zhihu.com/?target=http://tencent.yundashi168.com/756.html">Jenkins之Nexus搭建Maven私有仓库</a></li><li><strong>搭建微信小程序，微信公众号，APP，H5前端等应用的后端服务器.</strong></li><li><strong>搭建和部署各种开源项目</strong>。GitHub很多开源项目都支持部署到云服务器。</li></ul><h1 id="服务器的配置"><a href="#服务器的配置" class="headerlink" title="服务器的配置"></a>服务器的配置</h1><ol><li><strong>重置密码。</strong></li></ol><p>在服务器管理控制台的”概览“部分的”服务器信息“栏中，点击“重置密码”重新设置root的密码。</p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923140522038.png" alt="image-20210923140522038"></p><ol start="2"><li><strong>安装ssh终端</strong></li></ol><p><a href="https://mobaxterm.mobatek.net/download.html?spm=a2c6h.12873639.0.0.6a287dd7jkDUie">MobaXterm Xserver with SSH, telnet, RDP, VNC and X11 - Download (mobatek.net)</a> 。MobaXterm这个ssh终端分为免费版和收费版。选择免费版。</p><p>这个ssh终端同时支持SSH和sFtp，可视化操作文件，不需要安装ftp工具。支持彩色日志。</p><ol start="3"><li><strong>通过MobaXterm连接服务器</strong></li></ol><p>连接服务器有两种方法，一种是以账号密码的方式连接，另一种是通过</p><p><strong>(1) 下面是通过账号和密码来连接服务器。</strong></p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923144057249.png" alt="image-20210923144057249"></p><p><strong>(2) 通过密钥连接</strong></p><p>windows下先检查<code>C:/Users/username/.ssh</code>目录下是否有<code>id_rsa.pub</code>和<code>id_rsa</code>两个文件。如果没有，使用以下命令生成，一直回车即可</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -b 4096</span><br></pre></td></tr></table></figure><p>将公钥<code>id_rsa.pub</code>的内容添加到服务器主机用户目录下的.ssh目录下名为<code>authorized_keys</code>的文件中。使用<code>ssh-copy-id</code>命令来完成添加内容的操作。</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">~$</span><span class="bash"> ssh-copy-id remote_user@remote_id</span></span><br><span class="line">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span><br><span class="line">remote_user@remote_id&#x27;s password: </span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   &quot;ssh &#x27;remote_user@remote_id&#x27;&quot;</span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br></pre></td></tr></table></figure><p>另一种添加公钥到服务器的<code>authorized_keys</code>的方法。登录阿里云 -&gt; 打开阿里云轻量应用服务器管理控制台 -&gt; 选择需要配置的安全组实例 -&gt; 左侧导航栏选择 服务器运维&gt;远程连接 -&gt; 选择密钥管理 -&gt; 上传公钥。（需要重启服务器）</p><p>配置mobaXterm，使得通过密钥连接服务器。</p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173211225.png" alt="image-20210923173211225"></p><ol start="4"><li><strong>[可选]创建一个新的用户</strong></li></ol><p>创建一个新用户，可以使用这个新用户的身份来登录服务器。</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">useradd username# 创建新用户</span><br><span class="line">passwd username # 为新用户设置密码</span><br></pre></td></tr></table></figure><p><strong>(1) 以这个身份连接服务器时，报错：</strong></p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/xauth:  file /home/username/.Xauthority does not exist</span><br></pre></td></tr></table></figure><p>报错原因是useradd添加用户的时候没有授权对应的家目录。</p><p>解决办法：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown username:username -R /home/user_dir</span><br></pre></td></tr></table></figure><p>或者在一开始创建用户的时候使用以下命令：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">useradd username -m # -m指定创建对应的home目录</span><br><span class="line">usermod -s /bin/bash username  # 指定shell，否则不便于终端操作</span><br></pre></td></tr></table></figure><p><strong>(2) Linux下新建用户之后不显示用户名和路径问题解决</strong></p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923151038385.png" alt="image-20210923151038385"></p><p>原因：新创建的用户没有指定shell。</p><p>解决办法：为用户指定shell</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 切换到root用户</span></span><br><span class="line">su root</span><br><span class="line"><span class="meta">#</span><span class="bash"> 使用usermod指定shell</span></span><br><span class="line">usermod -s /bin/bash username</span><br></pre></td></tr></table></figure><ol start="5"><li><strong>配置开放安全组，开放指定端口</strong></li></ol><p>登录阿里云 -&gt; 打开阿里云轻量应用服务器管理控制台 -&gt; 选择需要配置的安全组实例 -&gt; 左侧导航栏选择 安全 &gt; 防火墙 -&gt; 选择右上角的添加规则。</p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923152321889.png" alt="image-20210923152321889"></p><ul><li><strong>应用类型</strong>包括HTTPS，HTTP，MySQL，SSH，telnet，全部TCP，全部UDP等，也可以自定义。根据自己的选择，如果想使用已有的应用类型，例如HTTPS，那么后面的端口默认就是443，协议就是TCP。</li><li>如果你<strong>应用类型</strong>选择的是自定义，那么<strong>协议</strong>就可以选择TCP和UDP两种，一般网页访问是TCP，打游戏什么的会用到UDP，根据你自己的需求选择。</li><li>同样的，<strong>端口范围</strong>也可以自己定义，端口范围用“/”分隔，数字为1-65535之间，如1/81表示开放端口1到81。</li><li>设置完毕后保存即可。安全组配置自动生效。</li></ul><h1 id="Vscode远程开发配置"><a href="#Vscode远程开发配置" class="headerlink" title="Vscode远程开发配置"></a>Vscode远程开发配置</h1><ol><li>安装插件 <strong>Remote Development</strong>。</li><li>通过ctrl + alt + p 打开命令输入窗口。输入 ”Remote-SSH:Connect to Host..“.</li><li>第一次使用时选择”Add New SSH Host“配置一下。按照格式输入对应的账号@主机ip</li></ol><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173835199.png" alt="image-20210923173835199"></p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923170705440.png" alt="image-20210923170705440"></p><ol start="4"><li>选择第一个配置文件</li></ol><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173926287.png" alt="image-20210923173926287"></p><p>选择后，会在对应的目录下产生一个config文件。文件内容如下</p><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923174215215.png" alt="image-20210923174215215"></p><p>其中，Host代表的是服务器的别名。HostName是服务器的ip，User代表以哪个账号身份登录。</p><ol start="5"><li>选择Connect，连接服务器。</li></ol><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923174341163.png" alt="image-20210923174341163"></p><ol start="6"><li>选择服务器对应的操作系统类型</li></ol><p><img src="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/image-20210923173549483.png" alt="image-20210923173549483"></p><ol start="7"><li>通过<code>File-&gt;Open-&gt;File/Folder</code>打开文件或者文件夹，然后就可以像编辑本地文件一样编辑远程文件了。</li></ol><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul><li><p><a href="https://zhuanlan.zhihu.com/p/368487727">阿里云学生服务器申请地址详细攻略及用途案例演示(2021) - 知乎 (zhihu.com)</a></p></li><li><p><a href="https://zhuanlan.zhihu.com/p/301653835">推荐7款超级好用的终端工具 —— SSH+FTP - 知乎 (zhihu.com)</a></p></li><li><p><a href="https://www.cnblogs.com/youcong/p/11070351.html">/usr/bin/xauth: file /home/user/.Xauthority does not exist - 挑战者V - 博客园 (cnblogs.com)</a></p></li><li><p><a href="https://blog.csdn.net/qq_32106647/article/details/81561956">(71条消息) Linux下新建用户之后不显示用户名和路径问题解决_五命九九的博客-CSDN博客</a></p></li><li><p><a href="https://www.vpstip.com/simple-application-stop-firewall.html">阿里云轻量应用服务器如何开放安全组，开放指定端口 - 阿里云优惠网 (vpstip.com)</a></p></li><li><p>[VScode 的远程开发，体验后爽翻 - 知乎 (zhihu.com)](<a href="https://zhuanlan.zhihu.com/p/95678121#:~:text=%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AEVS">https://zhuanlan.zhihu.com/p/95678121#:~:text=二、配置VS</a> Code远程开发插件. 在VS code中，使用 ctrl%2Bshift%2Bx 快捷键打开插件搜索窗口，输入插件 Remote Development,Add New SSH Host 配置一下， myserver 是我自己配置的，选择这个就可以直接登录服务器了。. 然后就照着如下格式输入登录服务器的命令：.)</p></li></ul>]]></content>
+      
+      
       <categories>
-        <category>分布式系统</category>
+          
+          <category> 环境配置 </category>
+          
       </categories>
-      <tags>
-        <tag>数据密集型应用系统设计</tag>
-      </tags>
-  </entry>
+      
+      
+        <tags>
+            
+            <tag> 环境配置 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>hexo图片保存问题</title>
+      <link href="/2021/09/16/hexo%E5%9B%BE%E7%89%87%E4%BF%9D%E5%AD%98%E9%97%AE%E9%A2%98/"/>
+      <url>/2021/09/16/hexo%E5%9B%BE%E7%89%87%E4%BF%9D%E5%AD%98%E9%97%AE%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<p>hexo图片加载不出来。根本原因是图片的路径有问题。需要安装插件，修改插件的js脚本，并配置typora的图片保存位置。</p><span id="more"></span><h1 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h1><p>在cmd或者右键-&gt; git bash打开命令行</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-asset-image --save</span><br></pre></td></tr></table></figure><p>如果npm安装有问题，可以先安装cnpm，然后通过cnpm安装插件</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure><h1 id="修改插件的js脚本"><a href="#修改插件的js脚本" class="headerlink" title="修改插件的js脚本"></a>修改插件的js脚本</h1><p>打开/node_modules/hexo-asset-image/index.js，将脚本内容替换成以下代码</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&#x27;use strict&#x27;</span>;</span><br><span class="line"><span class="keyword">var</span> cheerio = <span class="built_in">require</span>(<span class="string">&#x27;cheerio&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// http://stackoverflow.com/questions/14480345/how-to-get-the-nth-occurrence-in-a-string</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getPosition</span>(<span class="params">str, m, i</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> str.split(m, i).join(m).length;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> version = <span class="built_in">String</span>(hexo.version).split(<span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">hexo.extend.filter.register(<span class="string">&#x27;after_post_render&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> config = hexo.config;</span><br><span class="line">  <span class="keyword">if</span>(config.post_asset_folder)&#123;</span><br><span class="line">    <span class="keyword">var</span> link = data.permalink;</span><br><span class="line"><span class="keyword">if</span>(version.length &gt; <span class="number">0</span> &amp;&amp; <span class="built_in">Number</span>(version[<span class="number">0</span>]) == <span class="number">3</span>)</span><br><span class="line">   <span class="keyword">var</span> beginPos = getPosition(link, <span class="string">&#x27;/&#x27;</span>, <span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">   <span class="keyword">var</span> beginPos = getPosition(link, <span class="string">&#x27;/&#x27;</span>, <span class="number">3</span>) + <span class="number">1</span>;</span><br><span class="line"><span class="comment">// In hexo 3.1.1, the permalink of &quot;about&quot; page is like &quot;.../about/index.html&quot;.</span></span><br><span class="line"><span class="keyword">var</span> endPos = link.lastIndexOf(<span class="string">&#x27;/&#x27;</span>) + <span class="number">1</span>;</span><br><span class="line">    link = link.substring(beginPos, endPos);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> toprocess = [<span class="string">&#x27;excerpt&#x27;</span>, <span class="string">&#x27;more&#x27;</span>, <span class="string">&#x27;content&#x27;</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; toprocess.length; i++)&#123;</span><br><span class="line">      <span class="keyword">var</span> key = toprocess[i];</span><br><span class="line"> </span><br><span class="line">      <span class="keyword">var</span> $ = cheerio.load(data[key], &#123;</span><br><span class="line">        <span class="attr">ignoreWhitespace</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">xmlMode</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">lowerCaseTags</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">decodeEntities</span>: <span class="literal">false</span></span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      $(<span class="string">&#x27;img&#x27;</span>).each(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"><span class="keyword">if</span> ($(<span class="built_in">this</span>).attr(<span class="string">&#x27;src&#x27;</span>))&#123;</span><br><span class="line"><span class="comment">// For windows style path, we replace &#x27;\&#x27; to &#x27;/&#x27;.</span></span><br><span class="line"><span class="keyword">var</span> src = $(<span class="built_in">this</span>).attr(<span class="string">&#x27;src&#x27;</span>).replace(<span class="string">&#x27;\\&#x27;</span>, <span class="string">&#x27;/&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(!<span class="regexp">/http[s]*.*|\/\/.*/</span>.test(src) &amp;&amp;</span><br><span class="line">   !<span class="regexp">/^\s*\//</span>.test(src)) &#123;</span><br><span class="line">  <span class="comment">// For &quot;about&quot; page, the first part of &quot;src&quot; can&#x27;t be removed.</span></span><br><span class="line">  <span class="comment">// In addition, to support multi-level local directory.</span></span><br><span class="line">  <span class="keyword">var</span> linkArray = link.split(<span class="string">&#x27;/&#x27;</span>).filter(<span class="function"><span class="keyword">function</span>(<span class="params">elem</span>)</span>&#123;</span><br><span class="line"><span class="keyword">return</span> elem != <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">var</span> srcArray = src.split(<span class="string">&#x27;/&#x27;</span>).filter(<span class="function"><span class="keyword">function</span>(<span class="params">elem</span>)</span>&#123;</span><br><span class="line"><span class="keyword">return</span> elem != <span class="string">&#x27;&#x27;</span> &amp;&amp; elem != <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">if</span>(srcArray.length &gt; <span class="number">1</span>)</span><br><span class="line">srcArray.shift();</span><br><span class="line">  src = srcArray.join(<span class="string">&#x27;/&#x27;</span>);</span><br><span class="line">  $(<span class="built_in">this</span>).attr(<span class="string">&#x27;src&#x27;</span>, config.root + link + src);</span><br><span class="line">  <span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info(<span class="string">&quot;update link as:--&gt;&quot;</span>+config.root + link + src);</span><br><span class="line">&#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line"><span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info(<span class="string">&quot;no src attr, skipped...&quot;</span>);</span><br><span class="line"><span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info($(<span class="built_in">this</span>));</span><br><span class="line">&#125;</span><br><span class="line">      &#125;);</span><br><span class="line">      data[key] = $.html();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure><h1 id="修改站点配置文件"><a href="#修改站点配置文件" class="headerlink" title="修改站点配置文件"></a>修改站点配置文件</h1><p>找到根目录下的站点配置文件_config.yml文件，搜索<code>post_asset_folder</code>。修改为</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">post_asset_folder: true</span><br></pre></td></tr></table></figure><p>这个配置的作用为，当通过<code>hexo new post &quot;xxx&quot;</code>创建md文件的时候，会附带创建一个同名的目录。我们需要将md文档中用到的图片存放在这个同名目录中。</p><h1 id="修改Typora关于图片存储路径的配置"><a href="#修改Typora关于图片存储路径的配置" class="headerlink" title="修改Typora关于图片存储路径的配置"></a>修改Typora关于图片存储路径的配置</h1><p>打开typora，选择 文件 -&gt; 偏好设置 -&gt; 图像</p><p><img src="/2021/09/16/hexo%E5%9B%BE%E7%89%87%E4%BF%9D%E5%AD%98%E9%97%AE%E9%A2%98/image-20210916105327110.png" alt="image-20210916105327110"></p><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol><li><a href="https://blog.csdn.net/weixin_44999716/article/details/112401495">(70条消息) hexo博客中插入的图片不显示_煜成’Studio的博客-CSDN博客_hexo 图片不显示</a></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> 环境配置 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 环境配置 </tag>
+            
+            <tag> hexo </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
 </search>
