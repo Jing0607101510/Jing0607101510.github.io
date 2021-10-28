@@ -22,22 +22,26 @@
     var CONFIG = {"hostname":"jing0607101510.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="介绍了什么是数据系统，同时数据系统普遍需要满足的三个性质。（1）可靠性。（2）可扩展性。（3）可维护性。">
+  <meta name="description" content="数据库中一些重要的数据结构">
 <meta property="og:type" content="article">
-<meta property="og:title" content="可靠、可扩展、可维护的系统应用">
-<meta property="og:url" content="https://jing0607101510.github.io/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:title" content="数据库数据结构">
+<meta property="og:url" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html">
 <meta property="og:site_name" content="Will&#39;s Blog">
-<meta property="og:description" content="介绍了什么是数据系统，同时数据系统普遍需要满足的三个性质。（1）可靠性。（2）可扩展性。（3）可维护性。">
+<meta property="og:description" content="数据库中一些重要的数据结构">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://jing0607101510.github.io/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/image-20211025113538099-16351329492811.png">
-<meta property="article:published_time" content="2021-10-25T07:51:06.000Z">
-<meta property="article:modified_time" content="2021-10-25T07:56:14.005Z">
+<meta property="og:image" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028165510271.png">
+<meta property="og:image" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028165946582.png">
+<meta property="og:image" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028170203228.png">
+<meta property="og:image" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/16145920-9880b308dd114715a50fed277a42dfa1.png">
+<meta property="og:image" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/16145933-76ad5aabbe6b4cd5a2e72af0df739e18.png">
+<meta property="article:published_time" content="2021-10-28T09:20:00.000Z">
+<meta property="article:modified_time" content="2021-10-28T09:22:02.918Z">
 <meta property="article:author" content="Will">
 <meta property="article:tag" content="数据密集型应用系统设计">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://jing0607101510.github.io/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/image-20211025113538099-16351329492811.png">
+<meta name="twitter:image" content="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028165510271.png">
 
-<link rel="canonical" href="https://jing0607101510.github.io/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/">
+<link rel="canonical" href="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
 
 
 <script id="page-configurations">
@@ -50,7 +54,7 @@
   };
 </script>
 
-  <title>可靠、可扩展、可维护的系统应用 | Will's Blog</title>
+  <title>数据库数据结构 | Will's Blog</title>
   
 
 
@@ -194,7 +198,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://jing0607101510.github.io/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="https://jing0607101510.github.io/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -207,7 +211,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          可靠、可扩展、可维护的系统应用
+          数据库数据结构
         </h1>
 
         <div class="post-meta">
@@ -218,7 +222,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-10-25 15:51:06 / 修改时间：15:56:14" itemprop="dateCreated datePublished" datetime="2021-10-25T15:51:06+08:00">2021-10-25</time>
+              <time title="创建时间：2021-10-28 17:20:00 / 修改时间：17:22:02" itemprop="dateCreated datePublished" datetime="2021-10-28T17:20:00+08:00">2021-10-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -236,7 +240,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.4k</span>
+              <span>807</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -255,49 +259,34 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>介绍了什么是数据系统，同时数据系统普遍需要满足的三个性质。（1）可靠性。（2）可扩展性。（3）可维护性。</p>
+        <p>数据库中一些重要的数据结构</p>
 <span id="more"></span>
 
-<h1 id="数据系统"><a href="#数据系统" class="headerlink" title="数据系统"></a>数据系统</h1><p>​    很多数据处理的新工具，能够针对不同的应用场景进行优化。这些工具，例如redis、kafka等，能够应用于不同的场景，例如数据存储、消息队列等等。系统之间的界限变得模糊。</p>
-<p>​    通常建立一个应用系统，单个组件并不能满足数据存储和处理的需求，而是多个组件组合在一起，每一个组件负责完成某一部分的功能。多个组件通过应用层代码链接起来。</p>
-<p><img src="/2021/10/25/%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E3%80%81%E5%8F%AF%E7%BB%B4%E6%8A%A4%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/image-20211025113538099-16351329492811.png" alt="image-20211025113538099"></p>
-<p>​    大多数的软件系统目标都需要关注三个问题：</p>
+<h1 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h1><p>采用类似日志的做法：新增加的数据或者修改的数据都是直接附加到文件的尾部。</p>
+<p>写入的速度很快，因为不需要查找，只需要一股脑地在文件尾部写入内容。</p>
+<p>对于读取或者查找来说，比较耗时。读取时需要遍历所有的内容一遍，开销是$O(n)$.</p>
+<h1 id="哈希索引"><a href="#哈希索引" class="headerlink" title="哈希索引"></a>哈希索引</h1><p><img src="/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028165510271.png" alt="image-20211028165510271"></p>
+<p>在日志格式的基础上，维持一个从键到内容起始位置的映射的表。这个表维持在内存中。</p>
+<p>为了应对文件的日益增大导致磁盘空间耗尽，可以将日志分解成一定大小的段。当段文件的大小到达指定大小的时候，就关闭这个文件。将后续的文件写入新的段文件中。</p>
+<p><img src="/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028165946582.png" alt="image-20211028165946582"></p>
+<p>可以对这些段文件进行压缩：只保留段文件中最新的键值。</p>
+<p>可以在压缩的同时，将多个段文件进行合并。</p>
+<p><img src="/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20211028170203228.png" alt="image-20211028170203228"></p>
+<h1 id="SSTable"><a href="#SSTable" class="headerlink" title="SSTable"></a>SSTable</h1><p>如果段文件中的键值对不是按照写入顺序进行排列的，而是按照键进行排列，那么这个段文件就是SSTable（排序字符串表）。</p>
+<p>SSTable上面也可以建立一个稀疏的从键到文件内偏移位置的映射。</p>
+<p><img src="/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/16145920-9880b308dd114715a50fed277a42dfa1.png" alt="image"></p>
 <ul>
-<li><strong>可靠性：</strong>在硬件、软件、人为出错的情况下，系统依然能够提供正常的服务。</li>
-<li><strong>可扩展性：</strong>在数据、流量、复杂性增加的时候，系统需要能够方便扩展以适配这种情况。</li>
-<li><strong>可维护性：</strong>当在维护现有功能或者适配新场景的时候，系统都应高效工作。</li>
+<li>合并多个SSTable的时候，可以使用归并排序。</li>
+<li>不需要建立所有键所对应的偏移位置，只需稀疏的记录某些键对应的偏移位置。</li>
 </ul>
-<h1 id="可靠性"><a href="#可靠性" class="headerlink" title="可靠性"></a>可靠性</h1><p>​    系统即使发生了某些错误，系统依然能够继续正常工作。这些错误包括了软件、硬件、人为的错误。我们希望系统能够提供：</p>
-<ul>
-<li>能够提供给用户正常的结果。</li>
-<li>系统能够容忍用户出现错误。</li>
-<li>防止未经授权的访问和滥用。</li>
-<li>性能能够应对典型的场景、合理负载压力。</li>
-</ul>
-<p>一些概念：</p>
-<ul>
-<li><strong>错误、故障（faults）：</strong>组件可能出现的错误。</li>
-<li><strong>容错（fault-tolerant）、弹性（resilient）：</strong> 系统可以应对错误。这里所说的应对错误是有程度的，不是说可以容忍所有错误。容忍不同的错误可能带来不同的待见。容错总是需要制定特定类型的固定。</li>
-<li><strong>失效（failure）:</strong> 失效是整个系统停止，不能为用户提供服务。发生故障不一定会使整个系统失效。通过设计容错机制，避免组件的故障导致系统整体失效。</li>
-</ul>
-<h1 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h1><p>​    系统能够应对流量的增加、数据量的增加等。系统有应对负载增加的能力。</p>
-<h2 id="描述负载"><a href="#描述负载" class="headerlink" title="描述负载"></a>描述负载</h2><p>​    负载使用负载参数来描述。有很多的负载参数：服务器每秒请求处理次数、数据库中写入的比例、聊天室的同时活动用户数量、缓存命中率。当关注不同方面时，使用不同的负载参数。</p>
-<h2 id="描述性能"><a href="#描述性能" class="headerlink" title="描述性能"></a>描述性能</h2><p>描述性能也可以有不同的指标：吞吐量、相应时间等。</p>
-<p>延迟描述的是请求的处理时间。响应时间是指用户发起请求到收到该请求的时间间隔，包括了处理时间、网络延迟、排队时间。</p>
-<p>每个相同的请求可能由于不同的实际情况而得到不同的响应时间。所以响应时间不是一个固定的数字，而是度量一种数值分布。如果使用响应时间的平均值，那么就会掩盖一些信息，无法投录多少用户实际经历了多少延迟。最好是使用百分位数。并且使用滑动窗口的方法，来估算相应时间。</p>
-<p>测试性能的时候，还需要考虑排队延迟。当服务器并行处理的请求有限，正在处理的少数请求会阻塞后面的请求。即使后续请求可能很简单，但是它阻塞在等待先前请求的完成。这是队头阻塞。所以测试系统时，客户端不需要总是等待先前的请求完成再发送下一个请求。</p>
-<h2 id="应对负载增加的方法"><a href="#应对负载增加的方法" class="headerlink" title="应对负载增加的方法"></a>应对负载增加的方法</h2><ul>
-<li><strong>水平扩展：</strong>增加更多的机器。</li>
-<li><strong>垂直扩展：</strong>将机器的性能升级。</li>
-</ul>
-<p>系统应该针对特定应用高度定制。背后取舍因素包括数据读取量、写入量、待存储的数据量、数据的复杂程度、响应时间要求、访问模式，或者更多的是上述所有因素的叠加，再加上其他更复杂的问题。</p>
-<p>扩展能力好的架构通常会做出某些假设，并针对假设优化设计，例如哪些操作是更频繁的，哪些操作是少数情况。如果这些假设最终发现是错误的，那么可扩展性的努力就白费了。</p>
-<h1 id="可维护性"><a href="#可维护性" class="headerlink" title="可维护性"></a>可维护性</h1><ul>
-<li><strong>可运维性：</strong>使得运维更加容易</li>
-<li><strong>简单性：</strong>使用抽象，简化复杂性</li>
-<li><strong>可演化性：</strong>易于改变，应对需求的变化。</li>
-</ul>
-
+<h1 id="LSM-Tree"><a href="#LSM-Tree" class="headerlink" title="LSM-Tree"></a>LSM-Tree</h1><p>LSM中log的单位是一个SSTable。</p>
+<p><img src="/2021/10/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/16145933-76ad5aabbe6b4cd5a2e72af0df739e18.png" alt="image_thumb[3][1]"></p>
+<h2 id="写入"><a href="#写入" class="headerlink" title="写入"></a>写入</h2><p>当写入时，加其添加到内存中的平衡树数据结构中（例如红黑树），这个内存中的树有时被称为内存表。</p>
+<p>为了实现数据库崩溃恢复，在磁盘上保留一个单独的日志文件。当执行写入操作的时候，将写入操作追加到日志文件中。</p>
+<p>当内存表大小大于某个阈值的时候，将他作为SSTable文件写入磁盘中，并丢弃对应的日志文件。由于树已经维护了按键排列的key-value对，写磁盘可以比较高效。薪SSTable文件称为数据库的最新部分。当SSTable写入磁盘的同时，写入可以继续写入到一个新的内存表实例中。</p>
+<h2 id="读取"><a href="#读取" class="headerlink" title="读取"></a>读取</h2><p>首先在内存表中查找键，接下来是从最新的磁盘段文件中查找，然后是从次新的磁盘段查找。</p>
+<p>后台进程周期性地执行段合并和压缩的过程，合并多个段文件，丢弃那些已经被覆盖或者删除的值。</p>
+<h1 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B-Tree"></a>B-Tree</h1>
     </div>
 
     
@@ -315,13 +304,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/09/23/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%A6%E7%94%9F%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%B4%AD%E4%B9%B0%E4%B8%8E%E9%85%8D%E7%BD%AE/" rel="prev" title="阿里云学生服务器购买与配置">
-      <i class="fa fa-chevron-left"></i> 阿里云学生服务器购买与配置
+    <a href="/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/" rel="prev" title="数据模型与查询语句">
+      <i class="fa fa-chevron-left"></i> 数据模型与查询语句
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/10/27/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/" rel="next" title="数据模型与查询语句">
-      数据模型与查询语句 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -380,7 +366,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.</span> <span class="nav-text">数据系统</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">可靠性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">可扩展性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E8%B4%9F%E8%BD%BD"><span class="nav-number">3.1.</span> <span class="nav-text">描述负载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E6%80%A7%E8%83%BD"><span class="nav-number">3.2.</span> <span class="nav-text">描述性能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E5%AF%B9%E8%B4%9F%E8%BD%BD%E5%A2%9E%E5%8A%A0%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">3.3.</span> <span class="nav-text">应对负载增加的方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%AF%E7%BB%B4%E6%8A%A4%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">可维护性</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%97%A5%E5%BF%97"><span class="nav-number">1.</span> <span class="nav-text">日志</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95"><span class="nav-number">2.</span> <span class="nav-text">哈希索引</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSTable"><span class="nav-number">3.</span> <span class="nav-text">SSTable</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LSM-Tree"><span class="nav-number">4.</span> <span class="nav-text">LSM-Tree</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">写入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96"><span class="nav-number">4.2.</span> <span class="nav-text">读取</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#B-Tree"><span class="nav-number">5.</span> <span class="nav-text">B-Tree</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
